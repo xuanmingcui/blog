@@ -25,7 +25,7 @@ SortBy         = "default"
 
     [article.list]
         # Showing article tags in the list view (e.g. homepage, section pages)
-        showTags = false
+        showTags = true
 
     [article.license]
         enabled = false
@@ -63,7 +63,7 @@ SortBy         = "default"
         caution   = "🚨"
 
 [widgets]
-    homepage = []
+    homepage = [{ type = "archives", params = { limit = 10 } }, { type = "tag-cloud", params = { limit = 20 } }]
     page     = []
 
 [opengraph.twitter]
