@@ -1,0 +1,15 @@
+[[social]]
+    identifier = "homepage"
+    name       = "GitHub Page"
+    url        = "https://xuanmingcui.github.io/"
+
+    [social.params]
+        icon = "user"
+
+[[social]]
+    identifier = "gs"
+    name       = "Google Scholar"
+    url        = "https://scholar.google.com/citations?user=2tpwyb4AAAAJ&hl=en"
+
+    [social.params]
+        icon = "google_scholar"

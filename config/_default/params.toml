@@ -4,6 +4,7 @@ rssFullContent = true
 # default = see https://gohugo.io/quick-reference/glossary/#default-sort-order
 # lastmod = sort by last modified date, in descending order
 SortBy         = "default"
+favicon        = "img/brahms.jpg"
 
 [footer]
     since      = 2026
@@ -15,7 +16,7 @@ SortBy         = "default"
 
 [sidebar]
     compact = false
-    avatar  = ""
+    avatar  = "img/brahms.jpg"
 
 [article]
     headingAnchor = false

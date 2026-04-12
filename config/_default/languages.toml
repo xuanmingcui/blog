@@ -1,0 +1,8 @@
+
+[en]
+    languageName = "English"
+    title        = "崔轩铭"
+    weight       = 1
+
+    [en.params.sidebar]
+        subtitle = "行之于途而映于心"
