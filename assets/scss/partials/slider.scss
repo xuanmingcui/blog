@@ -1,0 +1,186 @@
+/*!
+ *  Image slider / carousel component (custom addition to the Stack theme)
+ *  Paired with:
+ *    - layouts/_shortcodes/slider.html
+ *    - assets/ts/custom.ts   (arrows, dots, keyboard — progressive enhancement)
+ *
+ *  Rooted at `.article-content .slider` so every rule beats the theme's
+ *  `.article-content img` / `.article-content figure` (incl. the full-bleed
+ *  negative-margin rule) without needing !important.
+ */
+
+.article-content .slider {
+    --slider-height: 300px;
+
+    @include respond(md) {
+        --slider-height: 440px;
+    }
+
+    @include respond(xl) {
+        --slider-height: 520px;
+    }
+
+    position: relative;
+    margin: 1.5em 0;
+    border-radius: var(--card-border-radius);
+    overflow: hidden;
+    background-color: var(--card-background);
+    box-shadow: var(--shadow-l1);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+        box-shadow: var(--shadow-l2);
+    }
+
+    /* Scroll-snap track — works with swipe / trackpad even without JS */
+    &__track {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+
+        &::-webkit-scrollbar {
+            display: none; /* WebKit */
+        }
+    }
+
+    /* Each slide is a <figure>; reset the theme's default figure styling */
+    &__slide {
+        flex: 0 0 100%;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+        text-align: center;
+
+        .image-link {
+            display: block;
+            line-height: 0;
+            cursor: zoom-in;
+        }
+
+        img {
+            display: block;
+            width: 100%;
+            height: var(--slider-height);
+            max-width: none;
+            margin: 0;
+            border-radius: 0;
+            object-fit: cover;
+        }
+
+        figcaption {
+            padding: var(--spacing-sm) var(--card-padding);
+            font-size: 1.4rem;
+            line-height: 1.5;
+            color: var(--card-text-color-secondary);
+        }
+    }
+
+    &[data-fit="contain"] .slider__slide img {
+        object-fit: contain;
+        background-color: #000;
+    }
+
+    /* Prev / next arrows (injected by custom.ts) */
+    &__nav {
+        position: absolute;
+        top: calc(var(--slider-height) / 2);
+        transform: translateY(-50%);
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        color: #1a1a1a;
+        background-color: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: var(--shadow-l1);
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.25s ease, background-color 0.25s ease, transform 0.15s ease;
+
+        &--prev {
+            left: var(--spacing-md);
+        }
+
+        &--next {
+            right: var(--spacing-md);
+        }
+
+        &:hover {
+            background-color: #fff;
+        }
+
+        &:active {
+            transform: translateY(-50%) scale(0.92);
+        }
+
+        &:disabled {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        svg {
+            width: 22px;
+            height: 22px;
+        }
+    }
+
+    /* Reveal arrows on hover (desktop) and always on touch / keyboard focus */
+    &:hover .slider__nav:not(:disabled),
+    &__nav:focus-visible {
+        opacity: 1;
+    }
+
+    @media (hover: none) {
+        &__nav:not(:disabled) {
+            opacity: 1;
+        }
+    }
+
+    /* Dot indicators (injected by custom.ts) */
+    &__dots {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: var(--spacing-md);
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-xs);
+        pointer-events: none;
+    }
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.55);
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        pointer-events: auto;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+
+        &.is-active {
+            background-color: #fff;
+            transform: scale(1.4);
+        }
+    }
+
+    /* Respect users who prefer reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        &__track {
+            scroll-behavior: auto;
+        }
+    }
+}

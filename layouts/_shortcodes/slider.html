@@ -1,0 +1,76 @@
+{{- /*
+    Image slider / carousel shortcode for the Stack theme.
+
+    Pulls images from the current page bundle, runs them through Hugo's
+    image processing (responsive srcset via helper/responsive-image) and
+    renders an accessible CSS scroll-snap carousel. Each slide is emitted
+    as `figure > a.image-link` with data-pswp-* attributes, so it reuses
+    the theme's existing PhotoSwipe lightbox with no extra configuration.
+    Prev/next arrows, dots and keyboard nav are layered on by
+    assets/ts/custom.ts (progressive enhancement — swipe/scroll works
+    without JavaScript).
+
+    Params:
+        match    glob for page resources.                 Default: "slider/*"
+        captions show <figcaption> from a resource's
+                 .Params.caption or .Title.               Default: false
+        height   CSS height for the slides, e.g. "520px". Optional.
+        fit      object-fit for slides: cover | contain.  Default: cover
+
+    Usage (place on its own line, with blank lines above and below):
+        slider match="gallery/*" captions=true
+    wrapped in the Hugo shortcode delimiters {{< ... >}}
+*/ -}}
+{{- $ctx := .Page -}}
+{{- $match := .Get "match" | default "slider/*" -}}
+{{- $captions := in (slice "true" true) (.Get "captions") -}}
+{{- $fit := .Get "fit" | default "cover" -}}
+{{- $height := .Get "height" -}}
+{{- $widths := cond $ctx.Site.Params.ImageProcessing.Content.Enabled $ctx.Site.Params.ImageProcessing.Content.Widths nil -}}
+{{- $sizes := "(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" -}}
+{{- /* Keep only web-displayable, processable images (skips HEIC, video, .DS_Store, etc.) */ -}}
+{{- $images := slice -}}
+{{- range ($ctx.Resources.Match $match) -}}
+    {{- if reflect.IsImageResourceProcessable . -}}{{- $images = $images | append . -}}{{- end -}}
+{{- end -}}
+{{- $images = sort $images "Name" -}}
+{{- with $images -}}
+<div class="slider"
+    {{- with $height }} style="--slider-height: {{ . }};"{{ end }}
+    {{- if eq $fit "contain" }} data-fit="contain"{{ end }}
+    role="region" aria-roledescription="carousel"
+    aria-label="{{ with $ctx.Title }}{{ printf "Image gallery — %s" . }}{{ else }}Image gallery{{ end }}">
+    <div class="slider__track">
+        {{- range $i, $img := . -}}
+            {{- $alt := $img.Title -}}
+            {{- $caption := "" -}}
+            {{- if $captions -}}{{- $caption = $img.Params.caption | default $img.Title -}}{{- end -}}
+            {{- $res := $img -}}
+            {{- if and $ctx.Site.Params.imageProcessing.autoOrient (reflect.IsImageResourceProcessable $img) -}}
+                {{- $res = $img | images.Filter images.AutoOrient -}}
+            {{- end -}}
+            <figure class="slider__slide" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $images }}">
+                <a class="image-link" href="{{ $res.RelPermalink }}" target="_blank" rel="noopener"
+                    data-pswp-width="{{ $res.Width }}" data-pswp-height="{{ $res.Height }}">
+                    {{ partial "helper/responsive-image" (dict
+                        "Resource" $res
+                        "Widths" $widths
+                        "Attributes" (dict
+                            "src" $res.RelPermalink
+                            "width" $res.Width
+                            "height" $res.Height
+                            "alt" $alt
+                            "loading" "lazy"
+                            "decoding" "async"
+                            "sizes" $sizes
+                        )
+                    ) }}
+                </a>
+                {{- with $caption }}<figcaption>{{ . | markdownify }}</figcaption>{{ end -}}
+            </figure>
+        {{- end -}}
+    </div>
+</div>
+{{- else -}}
+    {{- warnf "[slider shortcode] no images matched %q in %q" $match $ctx.RelPermalink -}}
+{{- end -}}
